@@ -49,29 +49,40 @@ class MainActivity3 : AppCompatActivity() {
     }
 
     private fun saveChanges() {
-        val url = Uri.parse(Config.URL+"sensors")
+        //se obtienen los valores de los campos de texto
+        val name = etNewName.text.toString()
+        val type = etNewType.text.toString()
+        val value = etNewValue.text.toString()
+        //si algun campo esta vacio no se hace nada
+        if (name.isEmpty() || type.isEmpty() || value.isEmpty()) {
+            return
+        }
+        //se crea un objeto JSON con los valores de los campos de texto que se deben enviar al API REST
+        val body = JSONObject()
+        body.put("name", name)
+        body.put("type", type)
+        body.put("value", value)
+
+        //se crea la URL para hacer la peticion PUT al API REST agregando el id del sensor a actualizar tvNewId
+        val url = Uri.parse(Config.URL + "sensors/" + tvNewId.text.toString())
             .buildUpon()
             .build().toString()
-
-        val body = JSONObject()
-        body.put("name", etNewName.text.toString())
-        body.put("type", etNewType.text.toString())
-        body.put("value", etNewValue.text.toString())
-
-        val peticion = object: JsonObjectRequest(Request.Method.PUT, url, body,{
+        //se crea la peticion con JsonObjectRequest para realizar el PUT con los datos de JSONObject body a enviar
+        //el API REST regresa un JSON con los datos del senson actualizado, por lo que se puede usar JsonObjectRequest o StringRequest
+        //sin embargo la forma de enviar los datos cambia en el StringRequest, ver el ejemplo del login
+        val peticion = object: JsonObjectRequest(Request.Method.PUT, url, body, {
                 response ->
-                    Toast.makeText(this,"Guardado", Toast.LENGTH_LONG).show()
-                    finish()
+            Toast.makeText(this, "Guardado:"+response.toString(), Toast.LENGTH_LONG).show()
+            finish()
         }, {
-                    error -> Toast.makeText(this, error.toString(), Toast.LENGTH_LONG).show()
+                error -> Toast.makeText(this, error.toString(), Toast.LENGTH_LONG).show()
         }){
-                override fun getHeaders(): Map<String, String>{
-                    val body: MutableMap<String, String> = HashMap()
-                    body["Authorization"] = sesion.getString("jwt", "").toString()
-                    return body
+            override fun getHeaders(): Map<String, String>{
+                val body: MutableMap<String, String> = HashMap()
+                body["Authorization"] = sesion.getString("jwt", "").toString()
+                return body
             }
         }
-
         MySingleton.getInstance(applicationContext).addToRequestQueue(peticion)
     }
 

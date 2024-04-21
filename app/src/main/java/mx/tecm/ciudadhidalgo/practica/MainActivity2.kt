@@ -18,11 +18,11 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 
 class MainActivity2 : AppCompatActivity(), ItemListener {
-    private lateinit var  rvList: RecyclerView
+    private lateinit var rvList: RecyclerView
     private lateinit var btnAdd: Button
     private lateinit var btnRefresh: Button
 
-    lateinit var sesion: SharedPreferences
+    private lateinit var sesion: SharedPreferences
     private lateinit var lista: Array<Array<String?>>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +32,8 @@ class MainActivity2 : AppCompatActivity(), ItemListener {
         btnRefresh = findViewById(R.id.btnRefresh)
 
         sesion = getSharedPreferences("sesion", 0)
+        if(supportActionBar != null)
+            supportActionBar!!.title = "Sensores - " + sesion.getString("username", "")
 
         rvList.setHasFixedSize(true)
         rvList.itemAnimator = DefaultItemAnimator()
@@ -42,13 +44,20 @@ class MainActivity2 : AppCompatActivity(), ItemListener {
         btnAdd.setOnClickListener { startActivity(Intent(this, MainActivity3::class.java)) }
         btnRefresh.setOnClickListener { fill() }
     }
+
+    override fun onResume() {
+        super.onResume()
+        fill()
+    }
+
     private fun fill(){
         val url = Uri.parse(Config.URL+"sensors")
             .buildUpon()
             .build().toString()
         val peticion = object: JsonObjectRequest(Request.Method.GET, url, null,{
-                response -> val data = response.getJSONArray("data")
-            lista = Array(data.length()){ arrayOfNulls<String>(5) }
+                response ->
+                    val data = response.getJSONArray("data")
+                lista = Array(data.length()){ arrayOfNulls<String>(5) }
             for(i in 0 until data.length()){
                 lista[i][0] = data.getJSONObject(i).getString("id")
                 lista[i][1] = data.getJSONObject(i).getString("name")
@@ -75,12 +84,12 @@ class MainActivity2 : AppCompatActivity(), ItemListener {
     }
 
     override fun onEdit(v: View?, position: Int) {
-        val itent = Intent(this, MainActivity3::class.java)
-        itent.putExtra("id", lista[position][0])
-        itent.putExtra("name", lista[position][1])
-        itent.putExtra("type", lista[position][2])
-        itent.putExtra("id", lista[position][3])
-        startActivity(itent)
+        val intent = Intent(this, MainActivity3::class.java)
+        intent.putExtra("id", lista[position][0])
+        intent.putExtra("name", lista[position][1])
+        intent.putExtra("type", lista[position][2])
+        intent.putExtra("value", lista[position][3])
+        startActivity(intent)
 
 
     }
@@ -88,7 +97,7 @@ class MainActivity2 : AppCompatActivity(), ItemListener {
     override fun onDel(v: View?, position: Int) {
         AlertDialog.Builder(this)
             .setTitle("Eliminar")
-            .setMessage("¿ Segun eliminar ${lista[position][1]}?")
+            .setMessage("¿ Desa eleiminar el sensor ${lista[position][1]}?")
             .setPositiveButton("Si"){ dialog, wich ->
                 val url = Uri.parse(Config.URL+"sensors/" + lista[position][0])
                     .buildUpon()

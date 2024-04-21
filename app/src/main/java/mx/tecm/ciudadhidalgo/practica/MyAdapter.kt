@@ -43,10 +43,10 @@ class MyAdapter (private val dataset: Array<Array<String?>>?, private val listen
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.tvItemId.text = dataset!![position][0]
-        holder.tvItemName.text = dataset!![position][1]
-        holder.tvItemType.text = dataset!![position][2]
-        holder.tvItemValue.text = dataset!![position][3]
-        holder.tvItemDate.text = dataset!![position][4]
+        holder.tvItemName.text = dataset[position][1]
+        holder.tvItemType.text = dataset[position][2]
+        holder.tvItemValue.text = dataset[position][3]
+        holder.tvItemDate.text = dataset[position][4]
     }
 
 }
